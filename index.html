@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Propuesta Animada</title>
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: black;
+  }
+  canvas {
+    image-rendering: pixelated;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// ==================
+// CARGAR IMÁGENES
+// ==================
+
+let fondo = new Image();
+fondo.src = "fondo_1.png";
+
+let caminata1 = new Image();
+caminata1.src = "caminata_1.png";
+
+let caminata2 = new Image();
+caminata2.src = "caminata_2.png";
+
+let detenerse = new Image();
+detenerse.src = "detenerse_1.png";
+
+let esperando = new Image();
+esperando.src = "esperando_1.png";
+
+// ==================
+// VARIABLES
+// ==================
+
+let x = -150;
+let speed = 0.8;
+let frame = 0;
+let lastFrameTime = 0;
+let frameDelay = 300;
+
+let estado = "caminando"; 
+// caminando → detener → esperando
+
+let detenerTiempo = 0;
+
+// ==================
+// ANIMACIÓN
+// ==================
+
+function animate(timestamp) {
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Dibujar fondo
+    ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+
+    // CAMINANDO
+    if (estado === "caminando") {
+
+        if (timestamp - lastFrameTime > frameDelay) {
+            frame = (frame + 1) % 2;
+            lastFrameTime = timestamp;
+        }
+
+        let sprite = frame === 0 ? caminata1 : caminata2;
+
+        ctx.drawImage(sprite, Math.floor(x), canvas.height - 250, 200, 200);
+
+        x += speed;
+
+        // Punto donde se detiene
+        if (x > canvas.width / 2 - 100) {
+            estado = "detener";
+            detenerTiempo = timestamp;
+        }
+
+    }
+
+    // DETENERSE
+    else if (estado === "detener") {
+
+        ctx.drawImage(detenerse, Math.floor(x), canvas.height - 250, 200, 200);
+
+        // Mostrar detenerse por 1 segundo
+        if (timestamp - detenerTiempo > 1000) {
+            estado = "esperando";
+        }
+
+    }
+
+    // ESPERANDO (idle)
+    else if (estado === "esperando") {
+
+        ctx.drawImage(esperando, Math.floor(x), canvas.height - 250, 200, 200);
+
+    }
+
+    requestAnimationFrame(animate);
+}
+
+requestAnimationFrame(animate);
+</script>
+
+</body>
+</html>
